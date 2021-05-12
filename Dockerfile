@@ -55,8 +55,17 @@ RUN pip3 install pillow \
 #    wget \
 #    && apt-get autoremove
 
-# Create symlink to module settings file
-RUN pwsh -c "ln -s (Join-Path (Get-InstalledModule Javinizer).InstalledLocation -ChildPath jvSettings.json) /home/jvSettings.json"
+
+RUN \
+	mkdir -p /config && \
+	mkdir -p /logs && \
+	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.10/jvSettings.json /config/jvSettings.json && \
+	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.10/jvGenres.csv /config/jvGenres.csv && \
+	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.10/jvTags.csv /config/jvTags.csv && \
+	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.10/jvThumbs.csv /config/jvThumbs.csv && \
+	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.10/jvUncensor.csv /config/jvUncensor.csv && \
+	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.10/jvHistory.csv /logs/jvHistory.csv && \
+	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.10/jvLog.log /logs/jvLog.log
 
 # Add powershell universal environmental variables
 ENV Kestrel__Endpoints__HTTP__Url http://*:8600
@@ -67,3 +76,6 @@ ENV Logging__Path ./data/logs/log.txt
 
 EXPOSE 8600
 ENTRYPOINT ["/docker-entrypoint.sh"]
+
+# The config directory and logs config location
+VOLUME ["/config", "/logs"]
