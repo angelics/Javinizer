@@ -59,13 +59,13 @@ RUN pip3 install pillow \
 RUN \
 	mkdir -p /config && \
 	mkdir -p /logs && \
-	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.10/jvSettings.json /config/jvSettings.json && \
-	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.10/jvGenres.csv /config/jvGenres.csv && \
-	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.10/jvTags.csv /config/jvTags.csv && \
-	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.10/jvThumbs.csv /config/jvThumbs.csv && \
-	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.10/jvUncensor.csv /config/jvUncensor.csv && \
-	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.10/jvHistory.csv /logs/jvHistory.csv && \
-	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.10/jvLog.log /logs/jvLog.log
+	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.11/jvSettings.json /config/jvSettings.json && \
+	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.11/jvGenres.csv /config/jvGenres.csv && \
+	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.11/jvTags.csv /config/jvTags.csv && \
+	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.11/jvThumbs.csv /config/jvThumbs.csv && \
+	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.11/jvUncensor.csv /config/jvUncensor.csv && \
+	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.11/jvHistory.csv /logs/jvHistory.csv && \
+	ln -s /root/.local/share/powershell/Modules/Javinizer/2.4.11/jvLog.log /logs/jvLog.log
 
 # Add powershell universal environmental variables
 ENV Kestrel__Endpoints__HTTP__Url http://*:8600
