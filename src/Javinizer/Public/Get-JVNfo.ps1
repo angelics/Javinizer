@@ -86,7 +86,10 @@ function Get-JVNfo {
         [String]$OriginalPath,
 
         [Parameter()]
-        [Boolean]$AltNameRole
+        [Boolean]$AltNameRole,
+
+        [Parameter()]
+        [Boolean]$AddGenericRole
     )
 
     process {
@@ -133,6 +136,7 @@ function Get-JVNfo {
     <mpaa>XXX</mpaa>
     <tagline>$Tagline</tagline>
     <set>$Series</set>
+    <thumb>$CoverUrl</thumb>
 
 "@
 
@@ -227,13 +231,22 @@ function Get-JVNfo {
     </actor>
 
 "@
-            } else {
+            } elseif ($AddGenericRole) {
                 $actressNfoString = @"
     <actor>
         <name>$actressName</name>
         <altname>$altName</altname>
         <thumb>$($item.ThumbUrl)</thumb>
         <role>Actress</role>
+    </actor>
+
+"@
+            } else {
+                $actressNfoString = @"
+    <actor>
+        <name>$actressName</name>
+        <altname>$altName</altname>
+        <thumb>$($item.ThumbUrl)</thumb>
     </actor>
 
 "@

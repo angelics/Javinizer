@@ -26,6 +26,7 @@ function Get-JVSortData {
     process {
         if ($Settings) {
             $MoveToFolder = $Settings.'sort.movetofolder'
+            $RenameFolder = $Settings.'sort.renamefolderinplace'
             $RenameFile = $Settings.'sort.renamefile'
             $MaxTitleLength = $Settings.'sort.maxtitlelength'
             $CreateNfo = $Settings.'sort.create.nfo'
@@ -100,7 +101,9 @@ function Get-JVSortData {
                 }
             }
         } else {
-            if ($DestinationPath) {
+            if ($RenameFolder) {
+                $folderPath = Join-Path -Path (Get-Item -LiteralPath $Path).Directory.Parent -ChildPath $folderName
+            } elseif ($DestinationPath) {
                 $folderPath = $DestinationPath
             } else {
                 $folderPath = (Get-Item -LiteralPath $Path).Directory
@@ -181,6 +184,8 @@ function Get-JVSortData {
             ScreenshotImgName    = $screenshotImgName
             ScreenshotFolderName = $screenshotFolderName
             ActorFolderName      = $actorFolderName
+            RenameNewPath        = ((Get-Item -LiteralPath $Path).Directory.Parent).ToString()
+            ParentPath           = ((Get-Item -LiteralPath $Path).Directory).ToString()
             FilePath             = $filePath
             FolderPath           = $folderPath
             NfoPath              = $nfoPath

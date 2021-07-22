@@ -24,6 +24,9 @@
   "scraper.movie.mgstageja": false,
   "scraper.movie.r18": true,
   "scraper.movie.r18zh": false,
+  "scraper.movie.tokyohot": false,
+  "scraper.movie.tokyohotja": false,
+  "scraper.movie.tokyohotzh": false,
   "scraper.option.dmm.scrapeactress": false,
   "scraper.option.idpreference": "id",
   "scraper.option.addmaleactors": false,
@@ -39,16 +42,14 @@
     ".rmvb",
     ".wmv"
   ],
-  "match.excludedfilestring": [
-    "^.*-trailer*",
-    "^.*-5\\."
-  ],
+  "match.excludedfilestring": ["^.*-trailer*", "^.*-5\\."],
   "match.regex": false,
   "match.regex.string": "([a-zA-Z|tT28]+-\\d+[zZ]?[eE]?)(?:-pt)?(\\d{1,2})?",
   "match.regex.idmatch": 1,
   "match.regex.ptmatch": 2,
   "sort.movetofolder": true,
   "sort.renamefile": true,
+  "sort.renamefolderinplace": false,
   "sort.maxtitlelength": 100,
   "sort.create.nfo": true,
   "sort.create.nfoperfile": true,
@@ -71,6 +72,7 @@
   "sort.format.screenshotfolder": "extrafanart",
   "sort.format.actressimgfolder": ".actors",
   "sort.metadata.nfo.mediainfo": false,
+  "sort.metadata.nfo.addgenericrole": true,
   "sort.metadata.nfo.altnamerole": false,
   "sort.metadata.nfo.translate": false,
   "sort.metadata.nfo.translate.module": "googletrans",
@@ -115,10 +117,7 @@
     "mgstageja",
     "aventertainment"
   ],
-  "sort.metadata.priority.alternatetitle": [
-    "javlibraryja",
-    "dmmja"
-  ],
+  "sort.metadata.priority.alternatetitle": ["javlibraryja", "dmmja"],
   "sort.metadata.priority.coverurl": [
     "r18",
     "javlibrary",
@@ -153,10 +152,7 @@
     "mgstageja",
     "aventertainment"
   ],
-  "sort.metadata.priority.contentid": [
-    "r18",
-    "dmmja"
-  ],
+  "sort.metadata.priority.contentid": ["r18", "dmmja"],
   "sort.metadata.priority.label": [
     "javlibrary",
     "r18",
@@ -178,11 +174,7 @@
     "mgstageja",
     "aventertainment"
   ],
-  "sort.metadata.priority.rating": [
-    "dmmja",
-    "javlibrary",
-    "mgstageja"
-  ],
+  "sort.metadata.priority.rating": ["dmmja", "javlibrary", "mgstageja"],
   "sort.metadata.priority.runtime": [
     "javlibrary",
     "r18",
@@ -191,11 +183,7 @@
     "mgstageja",
     "aventertainment"
   ],
-  "sort.metadata.priority.series": [
-    "r18",
-    "r18zh",
-    "mgstageja"
-  ],
+  "sort.metadata.priority.series": ["r18", "r18zh", "mgstageja"],
   "sort.metadata.priority.screenshoturl": [
     "r18",
     "javlibrary",
@@ -211,19 +199,21 @@
     "mgstageja",
     "aventertainment"
   ],
-  "sort.metadata.priority.trailerurl": [
-    "r18",
-    "dmmja"
-  ],
+  "sort.metadata.priority.trailerurl": ["r18", "dmmja"],
   "emby.url": "http://192.168.0.1:8096",
   "emby.apikey": "",
   "javlibrary.baseurl": "http://www.javlibrary.com",
   "javlibrary.browser.useragent": "",
-  "javlibrary.cookie.cfduid": "",
-  "javlibrary.cookie.cfclearance": "",
+  "javlibrary.cookie.cf_chl_2": "",
+  "javlibrary.cookie.cf_chl_prog": "",
+  "javlibrary.cookie.cf_clearance": "",
   "javlibrary.cookie.session": "",
   "javlibrary.cookie.userid": "",
   "javdb.cookie.session": "",
+  "proxy.enabled": false,
+  "proxy.host": "",
+  "proxy.username": "",
+  "proxy.password": "",
   "web.favorites.genre": [],
   "web.favorites.tag": [],
   "web.sort.recurse": false,

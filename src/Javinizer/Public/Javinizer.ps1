@@ -256,6 +256,7 @@ function Javinizer {
         [Parameter(ParameterSetName = 'Nfo', Position = 0)]
         [Parameter(ParameterSetName = 'Javlibrary', Position = 0)]
         [Parameter(ParameterSetName = 'Preview')]
+        [Parameter(ParameterSetName = 'Clean')]
         [AllowEmptyString()]
         [System.IO.FileInfo]$Path,
 
@@ -267,12 +268,14 @@ function Javinizer {
         [Parameter(ParameterSetName = 'Nfo')]
         [Parameter(ParameterSetName = 'Javlibrary')]
         [Parameter(ParameterSetName = 'Preview')]
+        [Parameter(ParameterSetName = 'Clean')]
         [Switch]$Recurse,
 
         [Parameter(ParameterSetName = 'Path')]
         [Parameter(ParameterSetName = 'Nfo')]
         [Parameter(ParameterSetName = 'Javlibrary')]
         [Parameter(ParameterSetName = 'Preview')]
+        [Parameter(ParameterSetName = 'Clean')]
         [Int]$Depth,
 
         [Parameter(ParameterSetName = 'Path')]
@@ -385,6 +388,15 @@ function Javinizer {
         [Switch]$AventertainmentJa,
 
         [Parameter(ParameterSetName = 'Info')]
+        [Switch]$Tokyohot,
+
+        [Parameter(ParameterSetName = 'Info')]
+        [Switch]$TokyohotZh,
+
+        [Parameter(ParameterSetName = 'Info')]
+        [Switch]$TokyohotJa,
+
+        [Parameter(ParameterSetName = 'Info')]
         [Switch]$AllResults,
 
         [Parameter(ParameterSetName = 'Info')]
@@ -449,6 +461,9 @@ function Javinizer {
         [Parameter(ParameterSetName = 'Preview')]
         [Hashtable]$Set,
 
+        [Parameter(ParameterSetName = 'Clean')]
+        [Switch]$Clean,
+
         [Parameter(ParameterSetName = 'Version', Mandatory = $true)]
         [Alias('v')]
         [Switch]$Version,
@@ -481,6 +496,11 @@ function Javinizer {
     process {
         if ($HideProgress) {
             $ProgressPreference = 'SilentlyContinue'
+        }
+
+        $global:PSDefaultParameterValues = @{
+            'Invoke-RestMethod:MaximumRetryCount' = 3
+            'Invoke-WebRequest:MaximumRetryCount' = 3
         }
 
         try {
@@ -519,6 +539,21 @@ function Javinizer {
                 }
             } catch {
                 Write-JVLog -Write:$script:JVLogWrite -LogPath $script:JVLogPath -WriteLevel $script:JVLogWriteLevel -Level Error -Message "[$($MyInvocation.MyCommand.Name)] Error occurred when defining settings using -Set: $PSItem"
+            }
+        }
+
+        if ($Settings.'proxy.enabled') {
+            $proxyPass = ConvertTo-SecureString $Settings.'proxy.password' -AsPlainText -Force
+            $proxyCred = New-Object System.Management.Automation.PSCredential -ArgumentList $Settings.'proxy.username', $proxyPass
+
+            [System.Net.Webrequest]::DefaultWebProxy = New-Object System.Net.WebProxy($Settings.'proxy.host')
+            [System.Net.WebRequest]::DefaultWebProxy.Credentials = $proxyCred
+
+            $global:PSDefaultParameterValues = @{
+                'Invoke-RestMethod:Proxy'           = $Settings.'proxy.host'
+                'Invoke-RestMethod:ProxyCredential' = $proxyCred
+                'Invoke-WebRequest:Proxy'           = $Settings.'proxy.host'
+                'Invoke-WebRequest:ProxyCredential' = $proxyCred
             }
         }
 
@@ -618,69 +653,38 @@ function Javinizer {
             }
         }
 
-        # Set default progress preference to a variable since we want to silence the webrequest check for javlibrary
-        $tempProgressPreference = $ProgressPreference
-        if (!($IsThread)) {
-            if (($Settings.'scraper.movie.javlibrary' -or $Settings.'scraper.movie.javlibraryja' -or $Settings.'scraper.movie.javlibraryzh' -and $Path) -or ($Javlibrary -or $JavlibraryZh -or $JavlibraryJa) -or ($Find -like '*javlibrary*' -or $Find -like '*g46e*' -or $Find -like '*m45e*') -or $SetOwned) {
-                $ProgressPreference = 'SilentlyContinue'
-                if (!($CfSession)) {
-                    try {
-                        Invoke-WebRequest -Uri $Settings.'javlibrary.baseurl' -Verbose:$false | Out-Null
-                    } catch {
-                        try {
-                            $CfSession = Get-CfSession -Cfduid:$Settings.'javlibrary.cookie.cfduid' -Cfclearance:$Settings.'javlibrary.cookie.cfclearance' -UserAgent:$Settings.'javlibrary.browser.useragent' -BaseUrl $Settings.'javlibrary.baseurl'
-                            # Testing with the newly created session sometimes fails if there is no wait time
-                            Start-Sleep -Seconds 1
-                            Invoke-WebRequest -Uri $Settings.'javlibrary.baseurl' -WebSession $CfSession -UserAgent $CfSession.UserAgent -Verbose:$false | Out-Null
-                        } catch {
-                            Write-JVLog -Write:$script:JVLogWrite -LogPath $script:JVLogPath -WriteLevel $script:JVLogWriteLevel -Level Warning -Message "[$($MyInvocation.MyCommand.Name)] Unable reach Javlibrary, enter websession/cookies to use the scraper"
-                            $CfSession = Get-CfSession -BaseUrl $Settings.'javlibrary.baseurl'
-                            # Testing with the newly created session sometimes fails if there is no wait time
-                            Start-Sleep -Seconds 1
-                            try {
-                                Invoke-WebRequest -Uri $Settings.'javlibrary.baseurl' -WebSession $CfSession -UserAgent $CfSession.UserAgent -Verbose:$false | Out-Null
-                            } catch {
-                                Write-JVLog -Write:$script:JVLogWrite -LogPath $script:JVLogPath -WriteLevel $script:JVLogWriteLevel -Level Error -Message "[$($MyInvocation.MyCommand.Name)] Unable reach Javlibrary, invalid websession values"
-                            }
-                        }
-                    }
-                } else {
-                    try {
-                        Invoke-WebRequest -Uri $Settings.'javlibrary.baseurl' -WebSession $CfSession -UserAgent $CfSession.UserAgent -Verbose:$false | Out-Null
-                    } catch {
-                        Write-JVLog -Write:$script:JVLogWrite -LogPath $script:JVLogPath -WriteLevel $script:JVLogWriteLevel -Level Error -Message "[$($MyInvocation.MyCommand.Name)] Unable reach Javlibrary, invalid websession values"
-                    }
-                }
-
-                if ($CfSession) {
-                    $originalSettingsContent = Get-Content -Path $SettingsPath
-                    $cookies = $CfSession.Cookies.GetCookies($Settings.'javlibrary.baseurl')
-                    $cfduid = ($cookies | Where-Object { $_.Name -eq '__cfduid' }).Value
-                    $cfclearance = ($cookies | Where-Object { $_.Name -eq 'cf_clearance' }).Value
-                    $userAgent = $CfSession.UserAgent
-                    $settingsContent = $OriginalSettingsContent
-                    $settingsContent = $settingsContent -replace '"javlibrary\.cookie\.cfduid": ".*"', "`"javlibrary.cookie.cfduid`": `"$cfduid`""
-                    $settingsContent = $settingsContent -replace '"javlibrary\.cookie\.cfclearance": ".*"', "`"javlibrary.cookie.cfclearance`": `"$cfclearance`""
-                    $settingsContent = $settingsContent -replace '"javlibrary\.browser\.useragent": ".*"', "`"javlibrary.browser.useragent`": `"$userAgent`""
-                    $origJson = $originalSettingsContent | ConvertFrom-Json
-                    $newJson = $settingsContent | ConvertFrom-Json
-
-                    if (($origJson.'javlibrary.browser.useragent' -ne $newJson.'javlibrary.browser.useragent') -or ($origJson.'javlibrary.cookie.cfduid' -ne $newJson.'javlibrary.cookie.cfduid') -or ($origJson.'javlibrary.cookie.cfclearance' -ne $newJson.'javlibrary.cookie.cfclearance')) {
-                        $settingsContent | Out-File -FilePath $SettingsPath
-                        Write-JVLog -Write:$script:JVLogWrite -LogPath $script:JVLogPath -WriteLevel $script:JVLogWriteLevel -Level Warning -Message "[$($MyInvocation.MyCommand.Name)] Replaced Javlibrary settings with updated values in [$SettingsPath]"
-                    }
-                }
-            }
-        }
-
-        $ProgressPreference = $tempProgressPreference
-
         switch ($PsCmdlet.ParameterSetName) {
             'Gui' {
                 if ($InstallGUI) {
                     Install-JVGui -Force:$Force
                 } elseif ($OpenGUI) {
                     Start-JVGui -Port:$Port
+                }
+            }
+
+            'Clean' {
+                if ($Depth -and $Recurse) {
+                    $files = Get-JVItem -Settings $Settings -Path $Path -Recurse:$Recurse -Depth:$Depth -Strict:$Strict
+                } else {
+                    $files = Get-JVItem -Settings $Settings -Path $Path -Recurse:$Recurse -Strict:$Strict
+                }
+
+                foreach ($file in $files) {
+                    try {
+                        if ($file.PartNumber) {
+                            $newName = $file.Id + '-pt' + $file.PartNumber + $file.Extension
+                        } else {
+                            $newName = $file.Id + $file.Extension
+                        }
+
+                        if ($newName -ne $file.FileName) {
+                            Rename-Item -LiteralPath $file.Fullname -NewName $newName
+                            Write-JVLog -Write:$script:JVLogWrite -LogPath $script:JVLogPath -WriteLevel $script:JVLogWriteLevel -Level Info -Message "[$($MyInvocation.MyCommand.Name)] Cleaned file '$($file.BaseName)' to '$newName' in [$($file.Directory)]"
+                        }
+                    } catch {
+                        Write-Error $PSItem
+                    }
+
                 }
             }
 
@@ -703,6 +707,10 @@ function Javinizer {
             }
 
             'Info' {
+                if (($Javlibrary -or $JavlibraryZh -or $JavlibraryJa) -or ($Find -like '*javlibrary*' -or $Find -like '*g46e*' -or $Find -like '*m45e*')) {
+                    $CfSession = Test-JavlibraryCf -Settings $Settings -CfSession $CfSession
+                }
+
                 if ($Find -match 'https?:\/\/') {
                     $urlObject = Get-JVUrlLocation -Url $Find -Settings $Settings
                     $data = foreach ($item in $urlObject) {
@@ -741,6 +749,10 @@ function Javinizer {
                         if ($item.Source -match 'javdb') {
                             $item.Url | Get-JavdbData
                         }
+
+                        if ($item.Source -match 'tokyohot') {
+                            $item.Url | Get-TokyoHotData
+                        }
                     }
 
                     $data = [PSCustomObject]@{
@@ -749,7 +761,7 @@ function Javinizer {
                 } else {
                     $data = Get-JVData -Id $Find -R18:$R18 -R18Zh:$R18Zh -Javlibrary:$Javlibrary -JavlibraryJa:$JavlibraryJa -JavlibraryZh:$JavlibraryZh -Dmm:$Dmm `
                         -DmmJa:$DmmJa -Javbus:$Javbus -JavbusJa:$JavbusJa -JavbusZh:$JavbusZh -Jav321Ja:$Jav321Ja -JavlibraryBaseUrl $Settings.'javlibrary.baseurl' `
-                        -MgstageJa:$MgstageJa -Aventertainment:$Aventertainment -AventertainmentJa:$AventertainmentJa -UncensorCsvPath $uncensorCsvPath -Strict:$Strict `
+                        -MgstageJa:$MgstageJa -Aventertainment:$Aventertainment -AventertainmentJa:$AventertainmentJa -Tokyohot:$Tokyohot -TokyohotJa:$TokyohotJa -TokyohotZh:$TokyohotZh -UncensorCsvPath $uncensorCsvPath -Strict:$Strict `
                         -Javdb:$Javdb -JavdbZh:$JavdbZh -Session:$CfSession -JavdbSession:$Settings.'javdb.cookie.session' -AllResults:$AllResults
                 }
 
@@ -758,7 +770,7 @@ function Javinizer {
                 }
 
                 if ($Nfo) {
-                    $nfoData = $data.Data | Get-JVNfo -ActressLanguageJa:$Settings.'sort.metadata.nfo.actresslanguageja' -NameOrder:$Settings.'sort.metadata.nfo.firstnameorder' -AltNameRole:$Settings.'sort.metadata.nfo.altnamerole'
+                    $nfoData = $data.Data | Get-JVNfo -ActressLanguageJa:$Settings.'sort.metadata.nfo.actresslanguageja' -NameOrder:$Settings.'sort.metadata.nfo.firstnameorder' -AltNameRole:$Settings.'sort.metadata.nfo.altnamerole' -AddGenericRole:$Settings.'sort.metadata.nfo.addgenericrole'
                     Write-Output $nfoData
                 } elseif ($Search -and $Aggregated) {
                     [PSCustomObject]@{
@@ -879,6 +891,7 @@ function Javinizer {
             }
 
             'Javlibrary' {
+                $CfSession = Test-JavlibraryCf -Settings $Settings -CfSession $CfSession
                 try {
                     if (!($Path)) {
                         $Path = $Settings.'location.input'
@@ -953,6 +966,10 @@ function Javinizer {
             }
 
             'Path' {
+                if (!$IsThread -and ($Settings.'scraper.movie.javlibrary' -or $Settings.'scraper.movie.javlibraryja' -or $Settings.'scraper.movie.javlibraryzh')) {
+                    $CfSession = Test-JavlibraryCf -Settings $Settings -CfSession $CfSession
+                }
+
                 if (!($Path)) {
                     try {
                         # Default path to location.input in settings if not specified

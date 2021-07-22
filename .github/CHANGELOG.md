@@ -5,6 +5,67 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.5.3]
+
+### Fixed
+- JAVLibrary cloudflare session now properly added to requests when running Javinizer without `-Path` (e.g. using location.input)
+- Suppress errors related to regex partnumber match when no partnumber is present
+
+## [2.5.2]
+### Added
+- Add setting to toggle the addition of generic actress role of `<role>Actress</role>` (#273)
+  -   `sort.metadata.nfo.addgenericrole`
+### Fixed
+- 3 -> 0 retries on webrequest to check for javlibrary cloudflare blocking to speed up initialization
+- Fixed json conversion loop which was breaking multiple javinizer GUI components
+- Regex multi-part matcher for movies that don't match standard DVD ID format should now match properly
+- Duplicate actresses without Japanese name should now be ignored from actress autoadd to thumb csv (again)
+
+## [2.5.1]
+
+### Added
+- Add functionality to rename folders in-place without moving files (#268)
+  - To use: set `"sort.renamefolderinplace": true` and `"sort.movetofolder": false`
+  - This will only work properly if there is a unique movie per directory, otherwise race conditions between conflicting movies will cause errors. I recommend testing this in a controlled environment before "production" use
+
+### Changed
+- JAVLibrary cookies changed following Cloudflare update
+  - Added
+    - `javlibrary.cookie.cf_chl_2`
+    - `javlibrary.cookie.cf_chl_prog`
+  - Changed
+    - `javlibrary.cookie.cfclearance` => `javlibrary.cookie.cf_clearance`
+  - Removed
+    - `javlibrary.cookie.cfduid`
+
+### Fixed
+- Javbus actress thumburls returning a relative url instead of the full url
+- Downloading images from alternate sources should now work properly (bug introduced from added proxy settings)
+- Duplicate actresses without Japanese name should now be ignored from actress autoadd to thumb csv
+
+## [2.5.0]
+
+### Added
+- Tokyohot scraper (#253)
+- Add settings to use proxy for web requests
+  - `proxy.enabled`
+  - `proxy.host`
+  - `proxy.username`
+  - `proxy.password`
+- <\thumb> tag added to nfo for the coverurl field (#267)
+- `-Clean` parameter to clean JAV filenames without sorting
+  - e.g. `Javinizer -Path C:\Javinizer\Unsorted -Clean -Verbose`
+
+### Changed
+- File matcher
+  - Files beginning with `hhd800.com@` are now cleaned properly
+  - Properly match multipart format with `.part, .pt, .cd`
+  - Multipart format now works with letters up to Y (From A-D => to A-Y) to better work with JAV VR
+### Fixed
+- Javbus coverUrl scraper returning a relative path instead of the full path
+- Single-word actresses from javlibrary being set as @Unknown in dynamic folder structures
+- Automatically retry all requests on failure (up to 3 times) to attempt to resolve failed javlibrary requests
+
 ## [2.4.11]
 ### Changed
 - Mgstage data scraper now includes trailer scraping (#262)

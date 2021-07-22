@@ -311,7 +311,7 @@ function Get-JavbusActress {
                     LastName     = $lastName
                     FirstName    = $firstName
                     JapaneseName = $jaActressName
-                    ThumbUrl     = $thumbUrl
+                    ThumbUrl     = 'https://www.javbus.com' + $thumbUrl
                 }
             }
         }
@@ -330,6 +330,8 @@ function Get-JavbusCoverUrl {
         try {
             $coverUrl = ($Webrequest | ForEach-Object { $_ -split '\n' } |
                 Select-String -Pattern "var img = '(.*)';").Matches.Groups[1].Value
+
+            $coverUrl = 'https://www.javbus.com' + $coverUrl
         } catch {
             return
         }
