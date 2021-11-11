@@ -1,4 +1,4 @@
-﻿$cache:guiVersion = '2.5.3-1'
+$cache:guiVersion = '2.5.9-1'
 
 # Define Javinizer module file paths
 $cache:modulePath = (Get-InstalledModule -Name Javinizer).InstalledLocation
@@ -123,6 +123,7 @@ $formatStringSettings = @(
 $sortSettings = @(
     'sort.movetofolder',
     'sort.renamefile',
+    'sort.movesubtitles',
     'sort.create.nfo',
     'sort.create.nfoperfile',
     'sort.download.actressimg',
@@ -3502,12 +3503,12 @@ $Pages += New-UDPage -Name "Settings" -Content {
                                             $cache:locationPath = $cache:settings."location.$setting"
                                             if ($null -ne $cache:locationPath -or $cache:locationPath -ne '') {
                                                 $cache:locationPath = switch ($setting) {
-                                                    'thumbcsv' { $cache:defaultThumbPath }
-                                                    'genrecsv' { $cache:defaultGenrePath }
-                                                    'uncensorcsv' { $cache:defaultUncensorPath }
-                                                    'historycsv' { $cache:defaultHistoryPath }
-                                                    'tagcsv' { $cache:defaultTagPath }
-                                                    'log' { $cache:defaultLogPath }
+                                                    'thumbcsv' { $cache:thumbCsvPath }
+                                                    'genrecsv' { $cache:genreCsvPath }
+                                                    'uncensorcsv' { $cache:uncensorCsvPath }
+                                                    'historycsv' { $cache:historyCsvPath }
+                                                    'tagcsv' { $cache:tagCsvPath }
+                                                    'log' { $cache:logPath}
                                                 }
                                             }
 
@@ -3554,6 +3555,7 @@ $Pages += New-UDPage -Name "Settings" -Content {
                             $sortTooltip = switch ($setting) {
                                 'sort.movetofolder' { 'Specifies to move the movie to its own folder after being sorted' }
                                 'sort.renamefile' { 'Specifies to rename the movie file after being sorted' }
+                                'sort.movesubtitles' { 'Specifies to automatically move subtitle files with the movie file after being sorted' }
                                 'sort.create.nfo' { 'Specifies to create the nfo file when sorting a movie' }
                                 'sort.create.nfoperfile' { 'Specifies to create a nfo file for every movie file, this will force the nfo to be renamed using the filename' }
                                 'sort.download.actressimg' { 'Specifies to download actress images when sorting a movie' }
@@ -3640,7 +3642,8 @@ $Pages += New-UDPage -Name "Settings" -Content {
                         }
 
                         New-UDGrid -Item -ExtraSmallSize 12 -SmallSize 12 -MediumSize 12 -Content {
-                            New-UDAutocomplete -Id 'autocomplete-settings-translatemodule' -Label 'Translate Module' -Options @('googletrans', 'google_trans_new') -Value ($cache:settings.'sort.metadata.nfo.translate.module') -OnChange {
+                            New-UDTypography -Text 'DeepL translator requires you to have a developer API key. You can set it via the JSON settings editor.'
+                            New-UDAutocomplete -Id 'autocomplete-settings-translatemodule' -Label 'Translate Module' -Options @('googletrans', 'google_trans_new', 'deepl') -Value ($cache:settings.'sort.metadata.nfo.translate.module') -OnChange {
                                 if ($null -eq (Get-UDElement -Id 'autocomplete-settings-translatemodule').value) {
                                     Set-UDElement -Id 'autocomplete-settings-translatemodule' -Properties @{
                                         value = 'googletrans'
