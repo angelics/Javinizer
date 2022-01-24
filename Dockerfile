@@ -55,18 +55,6 @@ RUN pip3 install pillow \
 #    wget \
 #    && apt-get autoremove
 
-
-RUN \
-	mkdir -p /config && \
-	mkdir -p /logs && \
-	pwsh -c "ln -s (Join-Path (Get-InstalledModule Javinizer).InstalledLocation -ChildPath jvSettings.json) /config/jvSettings.json" && \
-	pwsh -c "ln -s (Join-Path (Get-InstalledModule Javinizer).InstalledLocation -ChildPath jvGenres.csv) /config/jvGenres.csv" && \
-	pwsh -c "ln -s (Join-Path (Get-InstalledModule Javinizer).InstalledLocation -ChildPath jvTags.csv) /config/jvTags.csv" && \
-	pwsh -c "ln -s (Join-Path (Get-InstalledModule Javinizer).InstalledLocation -ChildPath jvThumbs.csv) /config/jvThumbs.csv" && \
-	pwsh -c "ln -s (Join-Path (Get-InstalledModule Javinizer).InstalledLocation -ChildPath jvUncensor.csv) /config/jvUncensor.csv" && \
-	pwsh -c "ln -s (Join-Path (Get-InstalledModule Javinizer).InstalledLocation -ChildPath jvHistory.csv) /logs/jvHistory.csv" && \
-	pwsh -c "ln -s (Join-Path (Get-InstalledModule Javinizer).InstalledLocation -ChildPath jvLog.log) /logs/jvLog.log"
-
 # Add powershell universal environmental variables
 ENV Kestrel__Endpoints__HTTP__Url http://*:8600
 ENV Data__RepositoryPath ./data/Repository
